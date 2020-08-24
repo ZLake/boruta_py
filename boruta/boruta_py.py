@@ -138,33 +138,33 @@ class BorutaPy(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    
+
     import pandas as pd
     from sklearn.ensemble import RandomForestClassifier
     from boruta import BorutaPy
-    
+
     # load X and y
     # NOTE BorutaPy accepts numpy arrays only, hence the .values attribute
     X = pd.read_csv('examples/test_X.csv', index_col=0).values
     y = pd.read_csv('examples/test_y.csv', header=None, index_col=0).values
     y = y.ravel()
-    
+
     # define random forest classifier, with utilising all cores and
     # sampling in proportion to y labels
     rf = RandomForestClassifier(n_jobs=-1, class_weight='balanced', max_depth=5)
-    
+
     # define Boruta feature selection method
     feat_selector = BorutaPy(rf, n_estimators='auto', verbose=2, random_state=1)
-    
+
     # find all relevant features - 5 features should be selected
     feat_selector.fit(X, y)
-    
+
     # check selected features - first 5 features are selected
     feat_selector.support_
-    
+
     # check ranking of features
     feat_selector.ranking_
-    
+
     # call transform() on X to filter it down to selected features
     X_filtered = feat_selector.transform(X)
 
@@ -214,7 +214,7 @@ class BorutaPy(BaseEstimator, TransformerMixin):
 
         weak: boolean, default = False
             If set to true, the tentative features are also used to reduce X.
-        
+
         return_df : boolean, default = False
             If ``X`` if a pandas dataframe and this parameter is set to True,
             the transformed data will also be a dataframe.
@@ -270,7 +270,7 @@ class BorutaPy(BaseEstimator, TransformerMixin):
         self._check_params(X, y)
 
         if not isinstance(X, np.ndarray):
-            X = self._validate_pandas_input(X) 
+            X = self._validate_pandas_input(X)
         if not isinstance(y, np.ndarray):
             y = self._validate_pandas_input(y)
 
@@ -554,7 +554,8 @@ class BorutaPy(BaseEstimator, TransformerMixin):
         Check hyperparameters as well as X and y before proceeding with fit.
         """
         # check X and y are consistent len, X is Array and y is column
-        X, y = check_X_y(X, y)
+        if not self._is_lightgbm: #使用lgb就不check了, lgb可以处理NA
+            X, y = check_X_y(X, y)
         if self.perc <= 0 or self.perc > 100:
             raise ValueError('The percentile should be between 0 and 100.')
 
